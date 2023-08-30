@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="flex flex-col items-center">
+  <form action="{{ url_for('weather') }}" method="POST" id="weather-form" class="w-full sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 mx-auto mt-10">
+  <div class="flex flex-col items-center">
+    <div class="w-full sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 mx-auto">
+      <div class="relative">
+        <label for="location_search" class="sr-only">Search location:</label>
+
+        <div class="flex rounded-md shadow-sm">
+          <input type="text" id="location_search" name="location_search" class="py-3 px-4 block w-full border-gray-200 shadow-sm rounded-l-md text-base focus:z-10 focus:border-white-500 focus:ring-white-500">
+          <button type="submit" class="search-button inline-flex flex-shrink-0 justify-center items-center w-[2.875rem] rounded-r-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-base" name="search">
+            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+            </svg>
+          </button>
+        </div>
+        {% if search_results %}
+        <ul class="max-w flex flex-col absolute left-0 right-0 z-10 bg-white dark:bg-gray-800">
+          {% for result in search_results %}
+          <li class="inline-flex items-center gap-x-2 py-3 px-4 text-sm font-medium border text-gray-800 first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-gray-700 dark:text-white">
+            <a href="#" class="w-full inline-block" data-lat="{{ result[4] }}" data-lon="{{ result[5] }}">{{ result[1] }}, {{ result[2] }}, {{ result[3] }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</form>
+
+{% if hours %}
+  <div class="flex flex-wrap mt-20 justify-center">
+    {% for i in range(4) %}
+    <div class="flex flex-col items-center border shadow-lg justify-center p-8 rounded-md w-60 sm:px-5 bg-white text-white-100 mx-2 my-auto">
+      <div class="text-center">
+        <h2 class="text-2xl font-bold">{{ day_list[i]}}</h2>
+      </div>
+      {% if day_info[i][1] == 'Clear' or day_info[i][1] == 'Sun' %}
+      <svg class="h-20 w-20 fill-current text-white ml-1 mb-4 mt-4" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79zM1 10.5h3v2H1zM11 .55h2V3.5h-2zm8.04 2.495l1.408 1.407-1.79 1.79-1.407-1.408zm-1.8 15.115l1.79 1.8 1.41-1.41-1.8-1.79zM20 10.5h3v2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm-1 4h2v2.95h-2zm-7.45-.96l1.41 1.41 1.79-1.8-1.41-1.41z"/></svg>
+      {% elif day_info[i][1] == 'Clouds' %}
+      <svg class="h-20 w-20 fill-current text-white ml-1 mb-4 mt-4" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12.01 6c2.61 0 4.89 1.86 5.4 4.43l.3 1.5 1.52.11c1.56.11 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3h-13c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.95 6 12.01 6m0-2C9.12 4 6.6 5.64 5.35 8.04 2.35 8.36.01 10.91.01 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96C18.68 6.59 15.65 4 12.01 4z"/></svg>
+      {% elif day_info[i][1] == 'Rain' %}
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="h-20 w-20 fill-current text-white ml-1 mb-4 mt-4">
+				<path d="M398.2,137.208a144.013,144.013,0,0,0-284.545.979,122.364,122.364,0,0,0-64.357,32.926A109.4,109.4,0,0,0,16,249.619c0,31.119,12.789,60.762,36.01,83.469q2.84,2.776,5.845,5.347l11.327-33.981C56.091,289.3,48,270.017,48,249.619c0-42.362,35.724-78.015,81.329-81.168l14.055-.972.814-14.065a111.995,111.995,0,0,1,223.589-.22l.891,14.888,14.913.155c46.592.488,80.409,34.714,80.409,81.382,0,33.152-16.706,61.38-41.84,75.9L409.032,364.9a110.012,110.012,0,0,0,54.938-32.358C484.625,310.339,496,280.889,496,249.619,496,190.507,454.859,144.4,398.2,137.208Z"></path>
+				<polygon points="126.029 496 159.817 496 223.153 309.136 192.847 298.864 126.029 496"></polygon>
+				<polygon points="294.029 496 327.817 496 391.153 309.136 360.847 298.864 294.029 496"></polygon>
+				<polygon points="290.11 251.033 225.781 448 259.445 448 320.529 260.967 290.11 251.033"></polygon>
+				<polygon points="128.791 251.033 64.461 448 98.125 448 159.209 260.967 128.791 251.033"></polygon>
+			</svg>
+      {% elif day_info[i][1] == 'Snow' %}
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-20 h-20 fill-current  text-white ml-1 mb-4 mt-4">
+				<polygon points="135.279 206.728 224.136 258.323 144.097 304.797 48.308 279.129 48.308 312.259 123.155 332.313 102.99 407.571 131.68 424.135 155.518 335.169 240 286.115 240 374.402 168.823 445.579 197.513 462.144 258 401.657 317.135 460.792 345.826 444.228 272 370.402 272 286.115 355.002 334.31 379.279 424.914 407.97 408.349 387.596 332.313 464 311.841 464 278.712 367.508 304.567 287.864 258.323 376.327 206.957 464 230.449 464 197.32 394.346 178.657 413.576 106.888 384.886 90.323 361.196 178.739 272 230.53 272 130.568 338.833 63.735 310.143 47.171 254.971 102.343 200.664 48.037 171.974 64.601 240 132.627 240 230.53 149.325 177.88 126.073 91.103 97.382 107.667 116.404 178.657 48.308 196.903 48.308 230.032 135.279 206.728"></polygon>
+			</svg>
+      {% endif %}
+      <div class="mb-2 text-5xl ml-4 font-bold">{{ day_info[i][0] }}°C</div>
+      <p class="dark:text-white-400 font-semibold ml-2">{{ day_info[i][2].title() }}</p>  
+      <p class="text-base font-semibold dark:text-black mt-5">Visibility: {{ day_info[i][3]/1000 }} Km </p>
+      <p class="text-base font-semibold dark:text-black">Humidity: {{ day_info[i][4] }}% </p>
+      <p class="text-base font-semibold dark:text-black">Wind Speed: {{ day_info[i][5] }} m/s </p>
+      <p class="text-base font-semibold dark:text-black">Sea Pressure: {{ day_info[i][6] }} hPa </p>
+      <p class="text-base font-semibold dark:text-black">Grnd Pressure: {{ day_info[i][7] }} hPa </p>
+      <p class="text-base font-semibold dark:text-black">Cloudiness: {{ day_info[i][8] }} % </p>
+
+
+      </div>
+    {% endfor %}
+    <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    {% for i in range(4) %}
+
+
+    <div class="flex flex-col gap-y-3 lg:gap-y-5 p-4 md:p-5 bg-white border shadow-sm rounded-xl dark:bg-white dark:border-black">
+      <div class="inline-flex justify-center items-center mr-1">
+        
+        {% if pollution_indexes[i]['aqi'] == 1 %}
+        <span class="w-3 h-3 inline-block bg-green-500 rounded-full mr-2"></span>
+        {% endif %}
+        
+        {% if pollution_indexes[i]['aqi'] == 2 %}
+        <span class="w-3 h-3 inline-block bg-custom-lightgreen rounded-full mr-2"></span>
+        {% endif %}
+
+        {% if pollution_indexes[i]['aqi'] == 3 %}
+        <span class="w-3 h-3 inline-block bg-custom-yellow rounded-full mr-2"></span>
+        {% endif %}
+
+        {% if pollution_indexes[i]['aqi'] == 4 %}
+        <span class="w-3 h-3 inline-block bg-custom-yelloworange rounded-full mr-2"></span>
+        {% endif %}
+
+        {% if pollution_indexes[i]['aqi'] == 5 %}
+        <span class="w-3 h-3 inline-block bg-custom-red rounded-full mr-2"></span>
+        {% endif %}
+
+        <span class="text-3xl font-bold text-black dark:text-black mx-2">Air Quality</span>
+      </div>
+
+      <div class="text-center">
+        <h3 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 dark:text-black">
+          {{  day_list[i] }} {{ pollution_indexes[i]['name'] }}
+        </h3>
+      </div>
+
+      <dl class="flex justify-center items-center divide-x divide-gray-200 dark:divide-gray-700">
+        <dt class="pr-3">
+          {% if i == 0 %} 
+          <span class="text-yellow-400">
+            <svg class="inline-block w-5 h-5 self-center ml-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+              <path d="M4 8h8v1H4z" stroke-width="2" stroke="currentColor" fill="none"/>
+            </svg>
+            
+          {% elif pollution_indexes[i - 1]['aqi'] > pollution_indexes[i]['aqi'] %}
+          <span class="text-green-600">
+            <svg class="inline-block w-5 h-5 self-center ml-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
+          </svg>
+          {% elif pollution_indexes[i - 1]['aqi'] < pollution_indexes[i]['aqi'] %}
+          <span class="text-red-600">
+            <svg class="inline-block w-5 h-5 self-center ml-4 transform rotate-180" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
+            </svg>
+          {% elif pollution_indexes[i - 1]['aqi'] == pollution_indexes[i]['aqi'] %}
+          <span class="text-yellow-400">
+            <svg class="inline-block w-5 h-5 self-center ml-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+              <path d="M4 8h8v1H4z" stroke-width="2" stroke="currentColor" fill="none"/>
+            </svg>
+          {% endif %}
+            </span>
+          </span>
+          <span class="block text-sm text-black">change</span>
+        </dt>
+        <dd class="text-left pl-3">
+          <span class="text-sm font-semibold text-gray-800 dark:text-black">Updated</span>
+          <span class="block text-sm text-black">just now</span>
+        </dd>
+      </dl>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+  <div class="flex flex-wrap mt-10 justify-center">
+    {% for i in range(4) %}
+    <div class="flex flex-col items-center border shadow-lg justify-center p-8 rounded-md w-60 sm:px-5 bg-white text-white-100 mx-2 my-auto">
+      <div class="text-center">
+        <h1 class="text-4xl font-bold mb-5">Today</h1>
+        <h2 class="text-2xl font-bold">{{ hours[i]}}</h2>
+      </div>
+      {% if temps[i] == 'Clear' or temps[i] == 'Sun' %}
+      <svg class="h-20 w-20 fill-current text-white ml-1 mb-4 mt-4" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79zM1 10.5h3v2H1zM11 .55h2V3.5h-2zm8.04 2.495l1.408 1.407-1.79 1.79-1.407-1.408zm-1.8 15.115l1.79 1.8 1.41-1.41-1.8-1.79zM20 10.5h3v2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm-1 4h2v2.95h-2zm-7.45-.96l1.41 1.41 1.79-1.8-1.41-1.41z"/></svg>
+      {% elif temps[i] == 'Clouds' %}
+      <svg class="h-20 w-20 fill-current text-white ml-1 mb-4 mt-4" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12.01 6c2.61 0 4.89 1.86 5.4 4.43l.3 1.5 1.52.11c1.56.11 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3h-13c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.95 6 12.01 6m0-2C9.12 4 6.6 5.64 5.35 8.04 2.35 8.36.01 10.91.01 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96C18.68 6.59 15.65 4 12.01 4z"/></svg>
+      {% elif temps[i] == 'Rain' %}
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="h-20 w-20 fill-current text-white ml-1 mb-4 mt-4">
+				<path d="M398.2,137.208a144.013,144.013,0,0,0-284.545.979,122.364,122.364,0,0,0-64.357,32.926A109.4,109.4,0,0,0,16,249.619c0,31.119,12.789,60.762,36.01,83.469q2.84,2.776,5.845,5.347l11.327-33.981C56.091,289.3,48,270.017,48,249.619c0-42.362,35.724-78.015,81.329-81.168l14.055-.972.814-14.065a111.995,111.995,0,0,1,223.589-.22l.891,14.888,14.913.155c46.592.488,80.409,34.714,80.409,81.382,0,33.152-16.706,61.38-41.84,75.9L409.032,364.9a110.012,110.012,0,0,0,54.938-32.358C484.625,310.339,496,280.889,496,249.619,496,190.507,454.859,144.4,398.2,137.208Z"></path>
+				<polygon points="126.029 496 159.817 496 223.153 309.136 192.847 298.864 126.029 496"></polygon>
+				<polygon points="294.029 496 327.817 496 391.153 309.136 360.847 298.864 294.029 496"></polygon>
+				<polygon points="290.11 251.033 225.781 448 259.445 448 320.529 260.967 290.11 251.033"></polygon>
+				<polygon points="128.791 251.033 64.461 448 98.125 448 159.209 260.967 128.791 251.033"></polygon>
+			</svg>
+      {% elif temps[i] == 'Snow' %}
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-8 h-8 fill-current">
+				<polygon points="135.279 206.728 224.136 258.323 144.097 304.797 48.308 279.129 48.308 312.259 123.155 332.313 102.99 407.571 131.68 424.135 155.518 335.169 240 286.115 240 374.402 168.823 445.579 197.513 462.144 258 401.657 317.135 460.792 345.826 444.228 272 370.402 272 286.115 355.002 334.31 379.279 424.914 407.97 408.349 387.596 332.313 464 311.841 464 278.712 367.508 304.567 287.864 258.323 376.327 206.957 464 230.449 464 197.32 394.346 178.657 413.576 106.888 384.886 90.323 361.196 178.739 272 230.53 272 130.568 338.833 63.735 310.143 47.171 254.971 102.343 200.664 48.037 171.974 64.601 240 132.627 240 230.53 149.325 177.88 126.073 91.103 97.382 107.667 116.404 178.657 48.308 196.903 48.308 230.032 135.279 206.728"></polygon>
+			</svg>
+      {% endif %}
+      <div class="mb-2 text-5xl ml-4 font-bold mt-5">{{ temps[i] }}°C</div>
+      </div>
+    {% endfor %}
+
+
+
+
+<div class="max-w-[85rem] sm:px-6 lg:px-8 lg:py-14 mx-auto ">
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    {% for pollutant in pollutants %}
+    
+    
+    <div class="flex flex-col gap-y-3 lg:gap-y-5 p-4 md:p-5 bg-white border shadow-sm rounded-xl dark:bg-white dark:border-black">
+      <div class="inline-flex justify-center items-center mr-1">
+        
+        {% set aqi = aqi_indexes.get(pollutant.name) %}
+        {% set color = '' %}
+        {% if aqi == 1 %}
+          {% set color = 'bg-green-500' %}
+        {% elif aqi == 2 %}
+          {% set color = 'bg-custom-lightgreen' %}
+        {% elif aqi == 3 %}
+          {% set color = 'bg-custom-yellow' %}
+        {% elif aqi == 4 %}
+          {% set color = 'bg-custom-yelloworange' %}
+        {% elif aqi == 5 %}
+          {% set color = 'bg-custom-red' %}
+        {% endif %}
+        
+        <span class="w-3 h-3 inline-block rounded-full mr-2 {{ color }}"></span>
+        <span class="text-3xl font-bold text-center text-black dark:text-black mx-2">Today:</span>
+
+        <span class="text-3xl font-bold text-black dark:text-black mx-2">{{ pollutant.name }}</span>
+      </div>
+      <div class="text-center">
+        
+        <h3 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 dark:text-black">
+          {{ pollutant.data }}
+        </h3>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endif %}
+
+
+
+
+
+
+
+
+
+</div>
+
+<script>
+document.querySelectorAll('#weather-form a').forEach(anchor => {
+  anchor.addEventListener('click', event => {
+    event.preventDefault();
+    handleItemClick(anchor.textContent);
+  });
+});
+
+function handleItemClick(item) {
+  // Set the search input value to the clicked item.
+  document.getElementById('location_search').value = item;
+
+  // Add the selected_item as a hidden input field in the form.
+  const form = document.getElementById('weather-form');
+  const hiddenInput = document.createElement('input');
+  hiddenInput.type = 'hidden';
+  hiddenInput.name = 'selected_item';
+  hiddenInput.value = item;
+  form.appendChild(hiddenInput);
+
+  // Submit the form.
+  form.submit();
+}
+ 
+document.getElementById('location_search').addEventListener('input', async (event) => {
+  const locationInput = event.target.value;
+  if (locationInput) {
+    const response = await fetch(`/?q=${encodeURIComponent(locationInput)}`);
+    const searchResults = await response.json();
+    updateSearchResults(searchResults);
+  } else {
+    updateSearchResults([]);
+  }
+});
+
+
+
+
+
+</script>
+
+
+
+{% endblock %}
